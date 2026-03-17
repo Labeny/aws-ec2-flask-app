@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My AWS App</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 100px; }
+        h1 { color: #FF9900; }
+        p { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Hello from AWS!</h1>
+    <p>Hosted on EC2 + S3</p>
+    <p id="api-response">Loading...</p>
+
+    <script>
+        fetch('/api')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('api-response').textContent = data.message;
+            });
+    </script>
+</body>
+</html>
