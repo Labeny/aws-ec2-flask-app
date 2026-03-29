@@ -2,7 +2,7 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-# 1. Намиране на най-новото Ubuntu
+# 1. Newest Ubuntu
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"] 
@@ -18,7 +18,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# 2. Мрежа (VPC)
+# 2. VPC
 resource "aws_vpc" "krepust_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -26,7 +26,7 @@ resource "aws_vpc" "krepust_vpc" {
   }
 }
 
-# 3. Интернет гейтуей (Вратата)
+# 3. Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.krepust_vpc.id
   tags = {
@@ -34,7 +34,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# 4. Подмрежа
+# 4. Subnet
 resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.krepust_vpc.id
   cidr_block        = "10.0.1.0/24"
@@ -45,7 +45,7 @@ resource "aws_subnet" "public_subnet_1" {
   }
 }
 
-# 5. Пътна карта (Route Table) - ТОВА ЛИПСВАШЕ
+# 5. Route Table
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.krepust_vpc.id
 
@@ -59,13 +59,13 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
-# 6. Свързване на пътя с подмрежата
+# 6. Connecting to subnet
 resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.public_subnet_1.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-# 7. Стена (Security Group)
+# 7. Security Group
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
   vpc_id      = aws_vpc.krepust_vpc.id
@@ -94,7 +94,7 @@ resource "aws_security_group" "allow_web" {
   }
 }
 
-# 8. Сървърът
+# 8. Server
 resource "aws_instance" "flask_server" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
@@ -102,8 +102,7 @@ resource "aws_instance" "flask_server" {
   vpc_security_group_ids      = [aws_security_group.allow_web.id]
   associate_public_ip_address = true
   
-  # Тук сложи името на твоя ключ, за да можеш да влезеш с SSH
-  # key_name = "the-first" 
+
 
   user_data = <<-EOF
               #!/bin/bash
@@ -118,7 +117,7 @@ resource "aws_instance" "flask_server" {
   }
 }
 
-# 9. Резултат
+# 9. Result
 output "server_public_ip" {
   value = aws_instance.flask_server.public_ip
 }
